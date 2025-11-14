@@ -1,4 +1,4 @@
-module GMW
+module GillMurrayWrightFactorization
 
 using LinearAlgebra
 
