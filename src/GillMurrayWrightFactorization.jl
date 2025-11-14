@@ -2,12 +2,12 @@ module GillMurrayWrightFactorization
 
 using LinearAlgebra
 
-struct MChol{T}
+struct MChol{T<:AbstractFloat}
     p::Vector{Int}
     L::Matrix{T}
 end
 
-function factorize(A::AbstractMatrix{T}, δ=eps(T)) where {T}
+function factorize(A::AbstractMatrix{T}, δ=eps(T)) where {T<:AbstractFloat}
     n, m = size(A)
     @assert n > 1
     @assert n == m
@@ -61,13 +61,13 @@ function factorize(A::AbstractMatrix{T}, δ=eps(T)) where {T}
     return MChol{T}(p, L)
 end
 
-function reconstruct!(A::AbstractMatrix{T}, F::MChol{T}) where {T}
+function reconstruct!(A::AbstractMatrix{D}, F::MChol{T}) where {D<:AbstractFloat, T<:AbstractFloat}
     pL = view(F.L, invperm(F.p), 1:length(F.p))
     mul!(A, pL, pL')
     return nothing
 end
 
-function reconstruct(F::MChol)
+function reconstruct(F::MChol{T}) where {T<:AbstractFloat}
     pL = view(F.L, invperm(F.p), 1:length(F.p))
     return pL * pL'
 end
