@@ -2,11 +2,16 @@ module GillMurrayWrightFactorization
 
 using LinearAlgebra
 
-struct MChol{T<:AbstractFloat}
-    p::Vector{Int}
-    L::Matrix{T}
-end
+"""
+Computes the positive-definite factorizaton of `A`.
 
+Returns the permutation `p` and lower factor `L` where `A[p,p] ≈ L * L'` if `A` is positive-definite.
+If `A` is not positive definite `(A + E)[p,p] = L * L'` where `E` is a positive diagonal matrix.
+
+The optional argument `δ` is the smallest possible value on the diagonal of `L`. By default, `δ` is
+the machine precision of the element type of `A`.
+
+"""
 function factorize(A::AbstractMatrix{T}, δ=eps(T)) where {T<:AbstractFloat}
     n, m = size(A)
     @assert n > 1
@@ -58,18 +63,28 @@ function factorize(A::AbstractMatrix{T}, δ=eps(T)) where {T<:AbstractFloat}
         end
     end
 
-    return MChol{T}(p, L)
+    return p, L
 end
 
-function reconstruct!(A::AbstractMatrix{D}, F::MChol{T}) where {D<:AbstractFloat, T<:AbstractFloat}
-    pL = view(F.L, invperm(F.p), 1:length(F.p))
-    mul!(A, pL, pL')
+
+"""
+Reconstruct a positive-definite matrix `A` from the permutation `p` and lower factor `L`.
+
+"""
+function reconstruct!(A::AbstractMatrix{S}, p::Vector{Int}, L::Matrix{T}) where {S<:AbstractFloat,T<:AbstractFloat}
+    mul!(view(A, p, p), L, L')
     return nothing
 end
 
-function reconstruct(F::MChol{T}) where {T<:AbstractFloat}
-    pL = view(F.L, invperm(F.p), 1:length(F.p))
-    return pL * pL'
+
+"""
+Reconstruct a positive-definite matrix `A` from the permutation `p` and lower factor `L`.
+
+"""
+function reconstruct(p::Vector{Int}, L::Matrix{T}) where {T<:AbstractFloat}
+    A = zeros(T, size(L)...)
+    reconstruct!(A, p, L)
+    return A
 end
 
-end # module GMW
+end # module GillMurrayWrightFactorization

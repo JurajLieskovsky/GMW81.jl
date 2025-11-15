@@ -1,6 +1,6 @@
 using Test
 using LinearAlgebra
-using GillMurrayWrightFactorization: factorize, reconstruct, reconstruct!
+using GillMurrayWrightFactorization
 
 # Factorization of a positive-definite matrix
 begin
@@ -10,17 +10,17 @@ begin
         0.0 -0.2 3.0
     ]
 
-    F = factorize(A)
+    p, L = GillMurrayWrightFactorization.factorize(A)
 
     # test that the reconstructed matrix
     # is the same as the original
 
     ## out-of-place reconstruction
-    @test isapprox(A, reconstruct(F))
+    @test isapprox(A, GillMurrayWrightFactorization.reconstruct(p, L))
 
     ## in-place reconstruction
     reA = zeros(Float64, 3, 3)
-    reconstruct!(reA, F)
+    GillMurrayWrightFactorization.reconstruct!(reA, p, L)
 
     @test isapprox(A, reA)
 end
@@ -37,8 +37,8 @@ begin
     @test !isposdef(A)
 
     # factorize and reconstruct matrix
-    F = factorize(A)
-    reA = reconstruct(F)
+    p, L = GillMurrayWrightFactorization.factorize(A)
+    reA = GillMurrayWrightFactorization.reconstruct(p, L)
 
     # test that the reconstructed matrix is posdef
     @test isposdef(reA)
